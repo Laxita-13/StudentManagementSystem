@@ -2,6 +2,7 @@ package com.example.Day3SMS.service;
 
 import com.example.Day3SMS.dto.StudentRequestdto;
 import com.example.Day3SMS.dto.StudentResponsedto;
+import com.example.Day3SMS.exception.StudentNotFoundException;
 import com.example.Day3SMS.model.StudentModel;
 import com.example.Day3SMS.repository.StudentRepository;
 import org.springframework.stereotype.Service;
@@ -60,5 +61,33 @@ public class StudentService {
                 orElseThrow(() -> new RuntimeException("No student found"));
         repository.delete(student);
     }
+    public StudentResponsedto patchStudent(String id, StudentRequestdto dto) {
+
+        StudentModel student = repository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+
+        // 🔹 Only update provided fields
+        if (dto.getName() != null && !dto.getName().isBlank()) {
+            student.setName(dto.getName());
+        }
+
+        if (dto.getAge() != null) {   // make age Integer, not int
+            student.setAge(dto.getAge());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            student.setEmail(dto.getEmail());
+        }
+
+        StudentModel saved = repository.save(student);
+
+        return new StudentResponsedto(
+                saved.getId(),
+                saved.getName(),
+                saved.getAge(),
+                saved.getEmail()
+        );
+    }
+
 
 }
